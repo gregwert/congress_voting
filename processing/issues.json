@@ -1,0 +1,1 @@
+{"https://www.govtrack.us/congress/votes/108-2004/s16/export/csv": {"issue": "ParserError: Error tokenizing data. C error: Expected 1 fields in line 4, saw 6", "comments": "Adressed the issue by removing last parantheses and retyping it. manually had to do. saved csv manually to proper directory"}}
