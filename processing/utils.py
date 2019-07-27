@@ -1,3 +1,4 @@
+from json import dump, load
 from os import makedirs
 from os.path import exists
 
@@ -17,3 +18,12 @@ def yea_marker(x):
 def year_to_session(year: int) -> int:
     """ Maps the year to the session of congress """
     return int((year - 1788 + year % 2)/2)
+
+
+def issue_update(issue_dict: str, url:str, issue: str, comment: str):
+    with open(issue_dict, 'r') as f:
+        d = load(f)
+    entry = {url: {'issue': issue, 'comments': comment}}
+    d.update(entry)
+    with open(issue_dict, 'w') as f:
+        dump(d, f)
