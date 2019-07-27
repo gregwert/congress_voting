@@ -9,24 +9,23 @@ from pandas import read_csv
 from utils import folder_maker, year_to_session
 
 
-def file_scraper(url, file_name: str) -> bool:
+def scraper(start: int, end: int, issues: Optional[str] = None, out: str = 'data') -> None:
     """
-    Makes a file with the records of how the vote happened. Vote number corresponds to natural not positive scale.
-    Returns a boolean where True corresponds to a successful scrape and False to a file not being found
-    (Only been tested from 2000 onwards)
+    Function to scrape house and senate votes for years
+    start, end: the starting and ending years for scraping, can go in either order
+    issues: the path for issues.json dict with known urls with issues
+    out: path for where the data will be saved
     """
-    try:
-        read_csv(url).to_csv(file_name, encoding='utf-8')
-    except HTTPError as err:
-        if err.code == 404:  # Vote not present in raw_data
-            print(f'{url} Not Found')
-            return False
-        elif err.code == 429:  # its retrying the server
-            print(f'  -server issue at {url}')
-            file_scraper(url, file_name)
-        else:  # errors I have not yet encountered
-            print('Other Error Encountered for {url}')
-    return True
+    if issues:
+        with open(issues, 'r') as f:
+            issues_dict = load(f)
+        print(f'Successfully loaded {issues}')
+    step = 1 if start <= end else -1
+    print(f'============ Starting Scraping for {start}-{end} ============')
+    for i in range(start, end + step, step):
+        year_scraper(i, 'h', issues_dict, out)
+        year_scraper(i, 's', issues_dict, out)
+    print(f'============ Finished Scraping for {start}-{end} ============')
 
 
 def year_scraper(year: int, chamber: str, issues: Optional[dict], out: str) -> None:
@@ -53,23 +52,24 @@ def year_scraper(year: int, chamber: str, issues: Optional[dict], out: str) -> N
     print(f'======== Scraping for {print_chamber} {year} Complete ========')
 
 
-def scraper(start: int, end: int, issues: Optional[str] = None, out: str = 'data') -> None:
+def file_scraper(url, file_name: str) -> bool:
     """
-    Function to scrape house and senate votes for years
-    start, end: the starting and ending years for scraping, can go in either order
-    issues: the path for issues.json dict with known urls with issues
-    out: path for where the data will be saved
+    Makes a file with the records of how the vote happened. Vote number corresponds to natural not positive scale.
+    Returns a boolean where True corresponds to a successful scrape and False to a file not being found
+    (Only been tested from 2000 onwards)
     """
-    if issues:
-        with open(issues, 'r') as f:
-            issues_dict = load(f)
-        print(f'Successfully loaded {issues}')
-    step = 1 if start <= end else -1
-    print(f'============ Starting Scraping for {start}-{end} ============')
-    for i in range(start, end + step, step):
-        year_scraper(i, 'h', issues_dict, out)
-        year_scraper(i, 's', issues_dict, out)
-    print(f'============ Finished Scraping for {start}-{end} ============')
+    try:
+        read_csv(url).to_csv(file_name, encoding='utf-8')
+    except HTTPError as err:
+        if err.code == 404:  # Vote not present in raw_data
+            print(f'{url} Not Found')
+            return False
+        elif err.code == 429:  # its retrying the server
+            print(f'  -server issue at {url}')
+            file_scraper(url, file_name)
+        else:  # errors I have not yet encountered
+            print('Other Error Encountered for {url}')
+    return True
 
 
 if __name__ == '__main__':
