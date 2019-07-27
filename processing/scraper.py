@@ -4,7 +4,8 @@ from os.path import exists
 from typing import Optional
 from urllib.error import HTTPError
 
-from pandas import read_csv
+from pandas import DataFrame, read_csv
+from pandas.errors import ParserError
 
 from utils import folder_maker, year_to_session
 
@@ -18,13 +19,13 @@ def scraper(start: int, end: int, issues: Optional[str] = None, out: str = 'data
     """
     if issues:
         with open(issues, 'r') as f:
-            issues_dict = load(f)
-        print(f'Successfully loaded {issues}')
+            print(f'Loading: {issues}')
+            issues = load(f)
     step = 1 if start <= end else -1
     print(f'============ Starting Scraping for {start}-{end} ============')
     for i in range(start, end + step, step):
-        year_scraper(i, 'h', issues_dict, out)
-        year_scraper(i, 's', issues_dict, out)
+        year_scraper(i, 'h', issues, out)
+        year_scraper(i, 's', issues, out)
     print(f'============ Finished Scraping for {start}-{end} ============')
 
 
@@ -35,8 +36,7 @@ def year_scraper(year: int, chamber: str, issues: Optional[dict], out: str) -> N
     path = f'{out}/raw_data/{year}/{chamber}'
     folder_maker(path)
     session = year_to_session(year)
-    exit_tally = 0
-    n = 0
+    exit_tally, n = 0, 0
     while exit_tally < 10:
         if n % 100 == 0:
             print(f'-------- {n} files have been processed --------')
@@ -48,28 +48,38 @@ def year_scraper(year: int, chamber: str, issues: Optional[dict], out: str) -> N
                 print(f'previous issue at: {url}')
                 print('See issues.json for comment. Skipping')
                 continue
-            exit_tally = 0 if file_scraper(url, file) else exit_tally + 1
+            exit_tally = 0 if page_scraper(url, file) else exit_tally + 1
     print(f'======== Scraping for {print_chamber} {year} Complete ========')
 
 
-def file_scraper(url, file_name: str) -> bool:
+def page_scraper(url, file_name: str) -> bool:
     """
     Makes a file with the records of how the vote happened. Vote number corresponds to natural not positive scale.
     Returns a boolean where True corresponds to a successful scrape and False to a file not being found
     (Only been tested from 2000 onwards)
     """
     try:
-        read_csv(url).to_csv(file_name, encoding='utf-8')
+        df = parsing_robust_scraping(url)
+        df.to_csv(file_name, encoding='utf-8')
     except HTTPError as err:
         if err.code == 404:  # Vote not present in raw_data
             print(f'{url} Not Found')
             return False
         elif err.code == 429:  # its retrying the server
             print(f'  -server issue at {url}')
-            file_scraper(url, file_name)
+            page_scraper(url, file_name)
         else:  # errors I have not yet encountered
-            print('Other Error Encountered for {url}')
+            print(f'Other Error Encountered for {url}')
+            print(err)
     return True
+
+
+def parsing_robust_scraping(url: str, header_len: int = 1) -> DataFrame:
+    """ Deals with irregular headers and returns resulting DataFrame """
+    try:
+        return read_csv(url, header=[i for i in range(header_len)])
+    except ParserError:
+        return parsing_robust_scraping(url, header_len+1)
 
 
 if __name__ == '__main__':
