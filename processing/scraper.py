@@ -77,7 +77,10 @@ def page_scraper(url, file_name: str) -> bool:
 def parsing_robust_scraping(url: str, header_len: int = 1) -> DataFrame:
     """ Deals with irregular headers and returns resulting DataFrame """
     try:
-        return read_csv(url, header=[i for i in range(header_len)])
+        df = read_csv(url, header=[i for i in range(header_len)])
+        if header_len > 1:  # on parsing errors the title is spread over more than one line
+            df.columns = df.columns.map('|'.join).str.strip('|')  # thus is we encounter one we merge the lines
+        return df
     except ParserError:
         return parsing_robust_scraping(url, header_len+1)
 
