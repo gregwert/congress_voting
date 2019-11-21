@@ -1,5 +1,6 @@
-notebooks/*
+*.ipynb*
 *__pycache__*
 data/*
 *.csv
 *.idea
+*venv
