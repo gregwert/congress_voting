@@ -8,6 +8,7 @@ from pandas import DataFrame, read_csv
 from pandas.errors import ParserError
 
 from utils import folder_maker, year_to_session
+# TODO: Make into single class:
 
 
 def scraper(start: int, end: int, issues: Optional[str] = None, out: str = 'data') -> None:
@@ -23,9 +24,9 @@ def scraper(start: int, end: int, issues: Optional[str] = None, out: str = 'data
             issues = load(f)
     step = 1 if start <= end else -1
     print(f'============ Starting Scraping for {start}-{end} ============')
-    for i in range(start, end + step, step):
-        year_scraper(i, 'h', issues, out)
-        year_scraper(i, 's', issues, out)
+    for year in range(start, end+step, step):
+        year_scraper(year, 'h', issues, out)
+        year_scraper(year, 's', issues, out)
     print(f'============ Finished Scraping for {start}-{end} ============')
 
 
