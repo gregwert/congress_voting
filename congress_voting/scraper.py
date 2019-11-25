@@ -1,4 +1,3 @@
-from argparse import ArgumentParser
 from json import load
 from os.path import exists
 from typing import Optional
@@ -7,7 +6,9 @@ from urllib.error import HTTPError
 from pandas import DataFrame, read_csv
 from pandas.errors import ParserError
 
-from utils import folder_maker, year_to_session
+from congress_voting.utils import folder_maker, year_to_session
+
+
 # TODO: Make into single class:
 
 
@@ -24,7 +25,7 @@ def scraper(start: int, end: int, issues: Optional[str] = None, out: str = 'data
             issues = load(f)
     step = 1 if start <= end else -1
     print(f'============ Starting Scraping for {start}-{end} ============')
-    for year in range(start, end+step, step):
+    for year in range(start, end + step, step):
         year_scraper(year, 'h', issues, out)
         year_scraper(year, 's', issues, out)
     print(f'============ Finished Scraping for {start}-{end} ============')
@@ -83,16 +84,4 @@ def parsing_robust_scraping(url: str, header_len: int = 1) -> DataFrame:
             df.columns = df.columns.map('|'.join).str.strip('|')  # thus is we encounter one we merge the lines
         return df
     except ParserError:
-        return parsing_robust_scraping(url, header_len+1)
-
-
-if __name__ == '__main__':
-    parser = ArgumentParser()
-    parser.add_argument('--start', help='the year you want to start scraping', type=int, required=True)
-    parser.add_argument('--end', help='the year you want to stop scraping', type=int, required=True)
-    parser.add_argument('--issues', help='the location of the issue.json ; useful for avoiding known problematic files',
-                        type=str, required=False, default=None)
-    parser.add_argument('--out', help='the location where you want to store the scraped data',
-                        type=str, required=False, default='data/')
-    args = parser.parse_args()
-    scraper(args.start, args.end, args.issues, args.out)
+        return parsing_robust_scraping(url, header_len + 1)
