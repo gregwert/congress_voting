@@ -9,7 +9,8 @@ from pandas.errors import ParserError
 from congress_voting.utils import folder_maker, year_to_session
 
 
-# TODO: Make into single class:
+# TODO: Make into single class
+# TODO: Document
 
 
 def scraper(start: int, end: int, issues: Optional[str] = None, out: str = 'data') -> None:
@@ -19,7 +20,7 @@ def scraper(start: int, end: int, issues: Optional[str] = None, out: str = 'data
     issues: the path for issues.json dict with known urls with issues
     out: path for where the data will be saved
     """
-    if issues:
+    if issues is not None:
         with open(issues, 'r') as f:
             print(f'Loading: {issues}')
             issues = load(f)
