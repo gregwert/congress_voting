@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from congress_voting.year_compiling import save_data
+from congress_voting.data_loading import save_data
 
 parser = ArgumentParser()
 parser.add_argument('--start', help='the year you want to start compiling and saving', type=int, required=True)
