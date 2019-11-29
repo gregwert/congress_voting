@@ -6,7 +6,7 @@ from numpy import concatenate
 from pandas import DataFrame, Series, merge, read_csv, read_table
 from pandas.core.indexes.base import Index
 
-from congress_voting.utils import folder_maker, session_to_years
+from congress_voting.utils import folder_maker, session_to_years, year_pair
 
 # TODO: consolidate into single class
 # TODO: document
@@ -53,8 +53,7 @@ def load_data(chamber: str, session: int = None, year: int = None, data_loc: str
         raise ValueError("Must provide a value for either 'year' or 'session'")
     elif session is not None and year is not None:
         raise ValueError("Cannot provide values for both 'session' and 'year'. Must only provide one")
-    years = session_to_years(session) if session is not None else (year-1, year) if year % 2 == 0 else (year, year+1)
-
+    years = session_to_years(session) if session is not None else year_pair(year)
     df = [process_csv(f'{data_loc}/yearly_records/{y}/{y}_{chamber}_votes.csv', chamber) for y in years]
     df = merge(left=df[0], right=df[1], on=id_columns, how='outer')
     return df
@@ -81,6 +80,7 @@ def get_vote_columns(data: DataFrame) -> Index:
 def yes_votes(vote: Series) -> Series:
     def yes_check(choice: str):
         return 1 if choice in yes_options else 0
+
     return vote.apply(yes_check)
 
 
