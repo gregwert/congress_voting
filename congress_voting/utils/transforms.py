@@ -3,7 +3,7 @@ from typing import Tuple
 
 def year_to_session(year: int) -> int:
     """ Maps the year to the session of congress """
-    return int((year - 1788 + year % 2) / 2)
+    return int((year + (year % 2) - 1788) / 2)
 
 
 def session_to_years(session: int) -> Tuple[int, int]:
