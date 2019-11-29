@@ -13,7 +13,8 @@ setup(
     package_dir={'': 'congress_voting'},
     packages=find_packages('congress_voting'),
     install_requires=[
-        'pandas>=0.25.3'
+        'pandas>=0.24.0',
+        'numpy>=1.17.0'
     ],
     long_description=long_description,
 )
