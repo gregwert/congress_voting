@@ -3,8 +3,7 @@ from os import listdir
 from typing import Iterable, Union
 
 from numpy import concatenate
-from pandas import DataFrame, Series, merge, read_csv, read_table
-from pandas.core.indexes.base import Index
+from pandas import DataFrame, Index, Series, merge, read_csv, read_table
 
 from congress_voting.utils import folder_maker, session_to_years, year_pair
 
